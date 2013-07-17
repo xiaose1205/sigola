@@ -23,7 +23,7 @@
   Dao的实现比较简单：
 <pre>  
 
-        public class demoDto extends BaseDao<demoModel> {
+        public class demoDao extends BaseDao<demoModel> {
  
 }
  </pre>
@@ -31,21 +31,21 @@
 <pre> 
 
         demoModel model = new demoModel();
-        demoDto Dto = new demoDto();    
+        demoDao dao = new demoDao();    
         /* 新增 */
          Random random = new Random();
          model.setUserName("demo" + random.nextInt());
          model.setUserPwd("123456");
-         int reslut = Dto.Add(model);
+         int reslut = dao.Add(model);
          System.out.println(reslut);
         /* 修改 */
          Random random = new Random();
          model.setUserName("update" + random.nextInt());
          model.setId(10);
-         Dto.Save(model);
+         dao.Save(model);
          /* 删除 */
          model.setId(1);
-         Dto.Remove(model);
+         dao.Remove(model);
 	 
 </pre>
 以往分页比较麻烦，现加入了PageList，内部实现了List<T>与count的。
