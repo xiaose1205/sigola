@@ -1,56 +1,61 @@
-使用了dbutils1.5,数据库暂时支持mysql.
+package controllers;
 
-使用说明：
-  Dao继承于BaseDao,Dto继承于BaseDto，IDao继承于IRepository(方便使用google.guicy);
-  Dto需要实现BaseDto中的toMap()与getTbName(); 
-<pre> 
-         
-         public class demoModel extends BaseDto {
-         	public demoModel()
-         	{
-         		this.setTbName("demo");
-         	}
-         	@Override
-         	public Map<String, String> toMap() 
-         	{
-         		Map<String, String> map = new HashMap<String, String>();
-         		......
-         		return map;
-         	}
-         }
+import java.sql.SQLException;
+import java.util.Date;
+import java.util.List;
+import java.util.Random;
 
-</pre>
-  Dao的实现比较简单：
-<pre>  
+import common.baseController;
+import common.judgeRequest;
 
-        public class demoDto extends BaseDao<demoModel> {
+import play.mvc.*;
+
+import data.DataAction;
+import data.PageList;
+import data.dataEnum.OrderByEnum;
+import data.dataEnum.RelationEnum;
+
+import logic.demoLogic;
+import models.*;
+
+public class Application extends baseController {
+
+    // CREATE TABLE `demo` (
+    // `id` INT(11) NOT NULL AUTO_INCREMENT,
+    // `username` VARCHAR(50) DEFAULT NULL,
+    // `userpwd` VARCHAR(50) DEFAULT NULL,
+    // `createdate` DATETIME DEFAULT NULL,
+    // PRIMARY KEY (`id`)
+    // ) ENGINE=INNODB AUTO_INCREMENT=940 DEFAULT CHARSET=latin1
+
+    public static void index() throws SQLException {
  
-}
- </pre>
- 以下为实现的一些逻辑。
-<pre> 
 
         demoModel model = new demoModel();
-        demoDto Dto = new demoDto();    
-        /* 新增 */
-         Random random = new Random();
-         model.setUserName("demo" + random.nextInt());
-         model.setUserPwd("123456");
-         int reslut = Dto.Add(model);
-         System.out.println(reslut);
-        /* 修改 */
-         Random random = new Random();
-         model.setUserName("update" + random.nextInt());
-         model.setId(10);
-         Dto.Save(model);
-         /* 删除 */
-         model.setId(1);
-         Dto.Remove(model);
-	 
-</pre>
-以往分页比较麻烦，现加入了PageList，内部实现了List<T>与count的。
-<pre> 
+        demoLogic logic = new demoLogic();
 
+        for (int i = 0; i < 1; i++) {
+
+            { /* 新增 */
+                Random random = new Random();
+                model.setUserName("demo" + random.nextInt());
+                model.setUserPwd("123456");
+                int reslut = logic.Add(model);
+                System.out.println(reslut);
+            }
+        }
+
+        {/* 修改 */
+            Random random = new Random();
+            model.setUserName("update" + random.nextInt());
+            model.setId(10);
+            logic.Save(model);
+        }
+        {
+            /* 删除 */
+            model.setId(1);
+            logic.Remove(model);
+        }
         PageList<demoModel> plist = null;
         List<demoModel> list = null;
         {
@@ -58,8 +63,8 @@
             action.setTable(model).setfileds("*");
             /* 对in进行适当的优化,一条数据的时候自动会进入= */
             action.where("userName", "12", RelationEnum.In);
-            action.where("userName", "wan", RelationEnum.LikeLeft);
-            action.where("userName", "an", RelationEnum.Like);
+            // action.where("userName", "wan", RelationEnum.LikeLeft);
+            // action.where("userName", "an", RelationEnum.Like);
             action.order("id", OrderByEnum.Desc);
             /* list */
             list = action.getList(demoModel.class);
@@ -80,29 +85,25 @@
 
             /*
              * select count(1) from demo where name='wangjun' order by id desc;
-             * 自动转换 'id,userName' 至'count(1)'
+             * auto changge 'id,userName' to 'count(1)'
              */
             System.out.println(logic.Cast().setfileds("id,userName")
                     .order("id").where("userName", "wangjun")
                     .getCount());
 
-            /* 执行count的结果 */
+            /* or count(id) we don't change to count(1) */
             System.out.println(logic.Cast().setfileds("count(id)")
                     .order("id").where("userName", "wangjun")
                     .getCount());
 
-            /*自动判断是否加入and的条件 */
+            /*auto  add and */
             System.out.println(logic.Cast().setfileds("count(id)")
                     .order("id").where("userName", "wangjun")
                     .where("and LENGTH(id)>=2")
                     .where("LENGTH(id)>=2").getCount());
         }
-		
-</pre>
 
-如果执行简单的sql
-<pre> 
-
+        {
             /* execute with nomarl sql */
             DataAction action = new DataAction();
             /* select into List<E> */
@@ -119,6 +120,17 @@
             action.excute(
                     "insert into demo (id,username)values(?,?)", obj);
 
-</pre>
+        }
 
+        System.out.println(plist.getTotalCount());
+        renderJSON(plist);
+    }
+    private static void showlist(List<demoModel> list) {
+        for (demoModel demoModel : list) {
+            System.out.println(demoModel.getId() + ":"
+                    + demoModel.getUserName());
+        }
 
+    }
+
+}
