@@ -122,3 +122,32 @@
 </pre>
 
 
+
+怎么用到play上面呢，使用插件的形式，添加sigolaPlugin（在你自己的项目中，名字可以自己定义）
+ 
+
+<pre> 
+
+public class sigolaPlugin extends PlayPlugin {
+    /*内置一个class继承IdbBase，是想getConnecion的方法，内部数据会主动获取这个操作*/
+     class dbBase implements IdbBase {
+        @Override
+        public Connection getConnection() {
+            // TODO Auto-generated method stub
+            return DB.getConnection();
+        }
+    }
+    public static boolean IsReady = false;
+      /*启动后赋值，基于play 1.2.4*/
+    @Override
+    public void onApplicationReady() {
+        if (!IsReady) {
+            MysqlHelper.idbBase = new dbBase();
+            System.out.println("onApplicationReady loading mysqlhelper.DBConnection");
+            IsReady = true;
+        }
+
+    }
+}
+
+</pre>
