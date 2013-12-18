@@ -1,0 +1,22 @@
+package com.dbutils.enums;
+
+/**
+ * Copyright (C) 2013, UC(����) All rights reserved
+ * 
+ * �ļ���ƣ� OrderByEnum.java ����:
+ * 
+ * @author wangjun4
+ * @contact wangjun4@ucweb.com
+ * @date 2013-5-28
+ * 
+ */
+public enum OrderByEnum {
+    /*
+     * ����
+     */
+    Asc,
+    /*
+     * ����
+     */
+    Desc
+}

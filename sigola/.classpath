@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="main"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="E:/快盘/projects/studytree/lib/commons-dbutils-1.5.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
