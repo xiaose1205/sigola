@@ -57,7 +57,6 @@ public class BaseDao<T extends BaseDto> implements IRepository<T> {
         this._baseModel = _baseModel;
     }
     private Class<T> clazz;
-    @SuppressWarnings("unchecked")
     public BaseDao() {
         super();
         try {
@@ -70,7 +69,6 @@ public class BaseDao<T extends BaseDto> implements IRepository<T> {
         }
 
     }
-    @SuppressWarnings("unchecked")
     public BaseDao(T baseModel) {
         try {
             clazz = (Class<T>) ((ParameterizedType) super.getClass()

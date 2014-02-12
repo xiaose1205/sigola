@@ -13,37 +13,62 @@ import java.util.Map;
  * 
  */
 public abstract class BaseDto {
-    /**
-     * 自动获取到id的值
-     * 
-     * @return
-     */
-    public abstract Long getId();
+	/**
+	 * 自动获取到id的值
+	 * 
+	 * @return
+	 */
+	public abstract Long getId();
 
-    /**
-     * 表名
-     */
-    private transient String tbName;
-    /**
-     * 主键名
-     */
-    private transient String keyName = "id";
+	/**
+	 * 表名
+	 */
+	private transient String tbName;
+	/**
+	 * 主键名
+	 */
+	private transient String keyName = "id";
 
-    public String getTbName() {
-        return tbName;
-    }
+	private String createDateStr;
 
-    public void setTbName(String tbName) {
-        this.tbName = tbName;
-    }
-    public String getKeyName() {
-        return keyName;
-    }
+	public String getCreateDateStr() {
+		return createDateStr;
+	}
 
-    public void setKeyName(String keyName) {
-        this.keyName = keyName;
-    }
+	public void setCreateDateStr(String createDateStr) {
+		this.createDateStr = createDateStr;
+	}
 
-    public abstract Map<String, Object>  toMap();
+	public String getTbName() {
+		return tbName;
+	}
+
+	public void setTbName(String tbName) {
+		this.tbName = tbName;
+	}
+
+	public String getKeyName() {
+		return keyName;
+	}
+
+	public void setKeyName(String keyName) {
+		this.keyName = keyName;
+	}
+
+	public abstract Map<String, Object> toMap();
+
+	/**
+	 * 操作数据库的对应的数据库的顺序,默认为第一个数据库
+	 */
+	private transient int dbIndex = 0;
+
+	public int getDbIndex() {
+		return dbIndex;
+	}
+
+	public void setDbIndex(int dbIndex) {
+		this.dbIndex = dbIndex;
+	}
+	
 
 }

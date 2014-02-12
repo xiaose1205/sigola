@@ -1,14 +1,13 @@
 package com.dbutils;
 
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List; 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
  
-import com.dbutils.common.DateUtil;
 import com.dbutils.enums.*;
 
 /**
@@ -22,7 +21,20 @@ import com.dbutils.enums.*;
  * 
  */
 public class DbAction {
+    public static final String DEFAULT_FORMAT = "yyyy-MM-dd HH:mm:ss";
+    public static final SimpleDateFormat sf = new SimpleDateFormat(
+            DEFAULT_FORMAT);
+    public static Date tranDate(long time) {
+        if (time == 0)
+            return null;
+        return new Date(time);
+    }
 
+    public static String tranDate(Date time) {
+        if (time == null)
+            return "";
+        return sf.format(time);
+    }
 	public enum sqlActionEnum {
 		insert, select, update, delete, replace, insertidentity
 	}
@@ -31,13 +43,34 @@ public class DbAction {
 
 	public DbAction setTable(String tableName) {
 		_tableName = tableName;
+		if (mysqlHelper == null) {
+			mysqlHelper = new MysqlHelper();
+			mysqlHelper.idbBase = ConnectPool.getInstance().getDbBase(
+					0);
+		}
+		return this;
+	}
+	public DbAction setTable(String tableName,int dbIndex) {
+		_tableName = tableName;
+		if (mysqlHelper == null) {
+			mysqlHelper = new MysqlHelper();
+			mysqlHelper.idbBase = ConnectPool.getInstance().getDbBase(
+					dbIndex);
+		}
 		return this;
 	}
 
 	public DbAction setTable(BaseDto baseModel) {
 		_tableName = baseModel.getTbName();
+		if (mysqlHelper == null) {
+			mysqlHelper = new MysqlHelper();
+			mysqlHelper.idbBase = ConnectPool.getInstance().getDbBase(
+					baseModel.getDbIndex());
+		}
 		return this;
 	}
+
+	private MysqlHelper mysqlHelper;
 
 	private MysqlHelper _handler = new MysqlHelper();
 
@@ -102,7 +135,7 @@ public class DbAction {
 		queryField.setCondition(condition);
 		queryField.setRelation(relation);
 		if (value != null && value.getClass() == Date.class)
-			queryField.setValue(DateUtil.tranDate((Date) value));
+			queryField.setValue(DbAction.tranDate((Date) value));
 		else
 			queryField.setValue(value);
 		queryField.setFiledName(filedName);
@@ -153,7 +186,10 @@ public class DbAction {
 	 * @return
 	 */
 	public DbAction setOrder(String filedName) {
-		orderSb.append(" order by ").append(filedName);
+		if (orderSb.length() == 0) {
+			orderSb.append(" order by ").append(filedName);
+		} else
+			orderSb.append(" ,").append(filedName);
 		return this;
 	}
 
@@ -222,15 +258,23 @@ public class DbAction {
 		ValueField field = new ValueField();
 		field.setField(filedName);
 		if (value.getClass() == Date.class) {
-			field.setFieldValue(DateUtil.tranDate((Date) value));
-			params.add(DateUtil.tranDate((Date) value));
+			field.setFieldValue(DbAction.tranDate((Date) value));
+			params.add(DbAction.tranDate((Date) value));
 		} else {
-			field.setFieldValue(value);
-			params.add(value);
+			field.setFieldValue(safeStr(value));
+			params.add(safeStr(value));
 		}
 		values.add(field);
 
 		return this;
+	}
+
+	public Object safeStr(Object object) {
+		if (object.getClass() == String.class) {
+			return object.toString().replace("<", "").replace(">", "")
+					.replace("'", "").replace("/", "");
+		}
+		return object;
 	}
 
 	/**
@@ -245,10 +289,10 @@ public class DbAction {
 		field.setField(filedName);
 		field.setSupParam(isSupParam);
 		if (value.getClass() == Date.class) {
-			field.setFieldValue(DateUtil.tranDate((Date) value));
+			field.setFieldValue(DbAction.tranDate((Date) value));
 
 		} else {
-			field.setFieldValue(value);
+			field.setFieldValue(safeStr(value));
 		}
 		values.add(field);
 		return this;
@@ -416,7 +460,7 @@ public class DbAction {
 		try {
 			if (actionEnum == sqlActionEnum.insertidentity)
 				try {
-					resultCode = MysqlHelper.excuteInsetIdi(
+					resultCode =mysqlHelper.excuteInsetIdi(
 							createSql(actionEnum), params.toArray());
 				} catch (SQLException e) {
 
@@ -451,7 +495,7 @@ public class DbAction {
 	 */
 	public int excute(String sql, Object... params) {
 		try {
-			return MysqlHelper.excute(sql, params);
+			return mysqlHelper.excute(sql, params);
 		} catch (SQLException e) {
 
 			e.printStackTrace();
@@ -468,7 +512,7 @@ public class DbAction {
 	 */
 	public Object getSingle(String sql, Object... params) {
 		try {
-			return MysqlHelper.getSingle(sql, params);
+			return mysqlHelper.getSingle(sql, params);
 		} catch (SQLException e) {
 
 			e.printStackTrace();
@@ -527,7 +571,7 @@ public class DbAction {
 	 */
 	public <T> List<T> getList(Class<T> classbean, String sql, Object... params) {
 		try {
-			List<T> dataList = MysqlHelper.queryList(classbean, sql, params);
+			List<T> dataList =mysqlHelper.queryList(classbean, sql, params);
 			return dataList;
 
 		} catch (SQLException e) {
@@ -561,7 +605,7 @@ public class DbAction {
 				limitstr = limit;
 				_filed = filed;
 				sql = createSql(sqlActionEnum.select);
-				List<T> dataList = MysqlHelper.queryList(classbean, sql,
+				List<T> dataList =mysqlHelper.queryList(classbean, sql,
 						parObjects);
 				PageList<T> pageList = new PageList<T>();
 				pageList.addAll(dataList);
@@ -604,7 +648,7 @@ public class DbAction {
 	 */
 	public <T> T getModel(Class<T> classbean, String sql, Object... params) {
 		try {
-			T modelT = MysqlHelper.query(classbean, sql, params);
+			T modelT =mysqlHelper.query(classbean, sql, params);
 			return modelT;
 		} catch (SQLException e) {
 

@@ -12,6 +12,7 @@ import org.apache.commons.dbutils.handlers.BeanListHandler;
 import org.apache.commons.dbutils.handlers.ColumnListHandler;
 import org.apache.commons.dbutils.handlers.ScalarHandler;
 
+ 
 import com.dbutils.IdbBase;
 import com.dbutils.dbutilsext.*;
 
@@ -27,36 +28,40 @@ import com.dbutils.dbutilsext.*;
  */
 public class MysqlHelper {
 
-    public static IdbBase idbBase;
+	/**
+	 * 兼容旧的单一数据库的操作
+	 */
+    public  IdbBase idbBase;
     /**
      * 执行SQL语句的类
      */
-    private final static QueryRunner queryRunner = new QueryRunner();
+    private final  QueryRunner queryRunner = new QueryRunner();
 
-    public static Connection getConnection() {
+    public  Connection getConnection() {
 
         return idbBase.getConnection();
     }
+    
 
-    public static void close(Connection conn) throws SQLException {
+    public  void close(Connection conn) throws SQLException {
         if (conn != null) {
             conn.close();
         }
     }
 
-    public static void close(ResultSet rs) throws SQLException {
+    public  void close(ResultSet rs) throws SQLException {
         if (rs != null) {
             rs.close();
         }
     }
 
-    public static void close(Statement stmt) throws SQLException {
+    public  void close(Statement stmt) throws SQLException {
         if (stmt != null) {
             stmt.close();
         }
     }
 
-    public static void commitAndClose(Connection conn)
+    public  void commitAndClose(Connection conn)
             throws SQLException {
         if (conn != null) {
             try {
@@ -72,7 +77,7 @@ public class MysqlHelper {
     /**
      * 将ResultSet中某一列的数据存成List，List中存放的是Object对象
      */
-    private final static ColumnListHandler columnListHandler = new ColumnListHandler() {
+    private final  ColumnListHandler columnListHandler = new ColumnListHandler() {
         @Override
         protected Object handleRow(ResultSet rs) throws SQLException {
             Object obj = super.handleRow(rs);
@@ -85,7 +90,7 @@ public class MysqlHelper {
     /**
      * 将ResultSet中一条记录的其中某一列的数据存成Object
      */
-    private final static ScalarHandler scalarHandler = new ScalarHandler() {
+    private final  ScalarHandler scalarHandler = new ScalarHandler() {
         @Override
         public Object handle(ResultSet rs) throws SQLException {
             Object obj = super.handle(rs);
@@ -98,9 +103,9 @@ public class MysqlHelper {
     /**
      * 原始类列表
      */
-    private final static List<Class<?>> PrimitiveClasses = new ArrayList<Class<?>>() {
+    private final  List<Class<?>> PrimitiveClasses = new ArrayList<Class<?>>() {
 
-        private static final long serialVersionUID = -1280108577998366966L;
+        private  final long serialVersionUID = -1280108577998366966L;
 
         {
             add(Long.class);
@@ -112,7 +117,7 @@ public class MysqlHelper {
         }
     };
 
-    private final static boolean isPrimitive(Class<?> clzz) {
+    private final  boolean isPrimitive(Class<?> clzz) {
         // Class.isPrimitive()判定指定的 Class 对象是否表示一个基本类型
         // PrimitiveClasses.contains(clzz)是否存在与原始类列表中
         return clzz.isPrimitive() || PrimitiveClasses.contains(clzz);
@@ -128,7 +133,7 @@ public class MysqlHelper {
      * @throws SQLException
      * @throws DBException
      */
-    public static <T> T query(Class<T> beanClass, String sql,
+    public  <T> T query(Class<T> beanClass, String sql,
             Object... params) throws SQLException {
         printIn(sql);
         printIn("params length:" + params.length);
@@ -157,7 +162,7 @@ public class MysqlHelper {
      */
 
     @SuppressWarnings("unchecked")
-    public static <T> List<T> queryList(Class<T> beanClass,
+    public  <T> List<T> queryList(Class<T> beanClass,
             String sql, Object... params) throws SQLException {
         printIn(sql);
         printIn("params length:" + params.length);
@@ -183,7 +188,7 @@ public class MysqlHelper {
      * @return
      * @throws DBException
      */
-    public static long stat(String sql, Object... params)
+    public  long stat(String sql, Object... params)
             throws SQLException {
         printIn(sql);
         printIn("params length:" + params.length);
@@ -202,7 +207,7 @@ public class MysqlHelper {
      * @return
      * @throws SQLException
      */
-    public static int excute(String sql, Object... params)
+    public  int excute(String sql, Object... params)
             throws SQLException {
         printIn(sql);
         printIn("params length:" + params.length);
@@ -211,19 +216,20 @@ public class MysqlHelper {
         }
         if (sql.toLowerCase().indexOf("insert") == -1) {
             return queryRunner.update(getConnection(), sql, params);
-        } else { 
+        } else {
             return queryRunner.update(getConnection(), sql, params);
 
         }
     }
     /**
      * insert into 并返回最后的响应的id
+     * 
      * @param sql
      * @param params
      * @return
      * @throws SQLException
      */
-    public static int excuteInsetIdi(String sql, Object... params)
+    public  int excuteInsetIdi(String sql, Object... params)
             throws SQLException {
         printIn(sql);
         printIn("params length:" + params.length);
@@ -247,7 +253,7 @@ public class MysqlHelper {
      * @return
      * @throws DBException
      */
-    public static int[] batch(String sql, Object[][] params)
+    public  int[] batch(String sql, Object[][] params)
             throws SQLException {
         try {
             printIn(sql);
@@ -264,7 +270,7 @@ public class MysqlHelper {
      * @return
      * @throws SQLException
      */
-    public static Object getSingle(String sql, Object... params)
+    public  Object getSingle(String sql, Object... params)
             throws SQLException {
         printIn(sql);
         printIn("params length:" + params.length);
@@ -275,13 +281,13 @@ public class MysqlHelper {
                 scalarHandler, params);
         return object;
     }
-    public static void printIn(Object sql) {
+    public  void printIn(Object sql) {
         if (isLogSql())
             System.out.println(sql);
     }
-    private static boolean LogSql = false;
+    private  boolean LogSql = false;
 
-    public static boolean isLogSql() {
+    public  boolean isLogSql() {
         return idbBase.isLogSql();
     }
 }

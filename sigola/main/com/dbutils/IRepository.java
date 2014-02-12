@@ -42,9 +42,9 @@ public interface IRepository<T> {
      * @param querys
      * @return
      */
-    PageList<T> findPageList(int pageIndex, int pageSize,
+    PageList<T> findPageList(int start, int limit,
             QueryField... fields);
 
-    List<T> findList(int pageIndex, int pageSize,
+    List<T> findList(int start, int limit,
             QueryField... fields);
 }

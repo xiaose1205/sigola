@@ -22,4 +22,9 @@ public interface IdbBase {
     Connection getConnection();
 
     boolean isLogSql();
+    /**
+     * 获取唯一的标志
+     * @return
+     */
+    int getUnique();
 }
