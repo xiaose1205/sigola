@@ -1,8 +1,12 @@
-使用了dbutils1.5,数据库暂时支持mysql.
+使用了dbutils1.5,数据库暂时支持mysql.支持多个数据库
 
 使用说明：
   Dao继承于BaseDao,Dto继承于BaseDto，IDao继承于IRepository(方便使用google.guicy);
-  Dto需要实现BaseDto中的toMap()与getTbName(); 
+  Dto需要实现BaseDto中的toMap()与getTbName(); 如果多数据库使用的时候，只需要将
+  @Override
+	public int getDbIndex() {
+		return 0;//对应于dbconnction的getUnique()，默认为0.
+	}
 <pre> 
          
          public class demoModel extends BaseDto {
@@ -119,6 +123,82 @@
             action.excute(
                     "insert into demo (id,username)values(?,?)", obj);
 
+</pre>
+
+<pre>
+public class DBPlugin extends PlayPlugin {
+	class dbBase implements IdbBase {
+		/**
+		 * 数据connection
+		 */
+		@Override
+		public Connection getConnection() {
+			return DB.getConnection();
+		}
+
+		@Override
+		public boolean isLogSql() {
+			if (Play.mode.isDev()) {
+				return true;
+			}
+			return false;
+		}
+
+		@Override
+		public int getUnique() {
+			return 0;//多数据库操作的dbIndex
+		}
+	}
+
+	class sysdbBase implements IdbBase {
+
+		@Override
+		public Connection getConnection() {
+			String strDriver = Play.configuration.getProperty("db1.driver");
+			String strUrl = Play.configuration.getProperty("db1.url"); 
+			String strUser = Play.configuration.getProperty("db1.user");
+			String strPass = Play.configuration.getProperty("db1.pass");
+
+			try {
+				Class.forName(strDriver).newInstance();
+				return DriverManager.getConnection(strUrl, strUser, strPass);
+			} catch (Exception e) {
+
+				e.printStackTrace();
+			}
+			return null;
+		}
+
+		@Override
+		public boolean isLogSql() {
+			if (Play.mode.isDev()) {
+				return true;
+			}
+			return false;		}
+
+		@Override
+		public int getUnique() {
+			 
+			return 1;
+		}
+
+	}
+
+	public static boolean IsReady = false;
+
+	/**
+	 * 全局启动，加载数据操作
+	 */
+	@Override
+	public void onApplicationStart() {
+		if (!IsReady) {
+			ConnectPool.getInstance().addDbBase(new dbBase());
+			ConnectPool.getInstance().addDbBase(new sysdbBase());
+			System.out
+					.println("onApplicationReady loading mysqlhelper.DBConnection");
+		}
+	}
+}
 </pre>
 
 
